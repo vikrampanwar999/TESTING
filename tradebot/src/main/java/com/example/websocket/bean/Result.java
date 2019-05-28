@@ -6,7 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class Result {
-	private List<Order> orders;
+	private List<Order2> orders;
 	private String orderId ;
 	private String orderStatus;
 	private String status;//it's returned when rejected
@@ -25,7 +25,7 @@ public class Result {
 	public void setStatus(String status) {
 		this.status = status;
 	}
-	public List<Order> getOrders() {
+	public List<Order2> getOrders() {
 		return orders;
 	}
 	public String getOrderId() {
@@ -58,7 +58,7 @@ public class Result {
 	public E55Product getE55Product() {
 		return e55Product;
 	}
-	public void setOrders(List<Order> orders) {
+	public void setOrders(List<Order2> orders) {
 		this.orders = orders;
 	}
 	public void setOrderId(String orderId) {

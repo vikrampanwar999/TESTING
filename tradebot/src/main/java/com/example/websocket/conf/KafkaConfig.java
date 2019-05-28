@@ -28,6 +28,9 @@ public class KafkaConfig {
 
 	@Value("${kafka.bootstrap-servers}")
 	private String bootstrapServers;
+	
+	@Value("${kafka.consumer-topic-ordersuffix}")
+	private String orderTopicSuffix;
 
 	@Value("${kafka.group-id}")
 	private String groupId;
@@ -145,6 +148,15 @@ public class KafkaConfig {
 	public void setProducerTopicPrefix(String producerTopicPrefix) {
 		this.producerTopicPrefix = producerTopicPrefix;
 	}
+
+	public String getorderTopicSuffix() {
+		return orderTopicSuffix;
+	}
+
+	public void setorderTopicSuffix(String orderTopicSuffix) {
+		this.orderTopicSuffix = orderTopicSuffix;
+	}
+	
 
 }
 

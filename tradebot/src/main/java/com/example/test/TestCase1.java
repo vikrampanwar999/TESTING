@@ -5,6 +5,9 @@ package com.example.test;
 import java.io.Console;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.codec.Charsets;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 import static org.assertj.core.api.Assertions.*;
 import com.example.websocket.bean.ExecutionReport;
+import com.example.websocket.bean.Order;
 import com.example.websocket.bean.Result;
 import com.example.websocket.bean.ResultWrapper;
 import com.example.websocket.conf.KafkaConfig;
@@ -30,56 +34,19 @@ public class TestCase1 {
 	@Autowired
 	KafkaConfig kafkaConfig;
 	public KafkaConsumer kc;
-	public static final String ANSI_RESET = "\u001B[0m";
-	public static final String ANSI_BLACK = "\u001B[30m";
-	public static final String ANSI_RED = "\u001B[31m";
-	//@Autowired KafkaConsumer kafkaConsumer;
+	public static HashMap<String,List<Order>>map=new HashMap<>() ;
 	public void setKafkaConsumer() throws ClassNotFoundException {
 		this.kc=new KafkaConsumer(this.kafkaConfig);
 	}
 	
-	public  Result PostReq(String symbol,String orderSide,String limitPrice,String orderqty) throws  IOException {
-	    CloseableHttpClient client = HttpClients.createDefault();
-	    HttpPost httpPost = new HttpPost("http://54.145.144.54:20004/exchange/openAPI?signature=12345");
-	    String json="{\n" + 
-	    		"	\"method\":\"exchange.insertOrder\",\n" + 
-	    		"	\"params\":[\n" + 
-	    		"		\"a\", \n" + 
-	    		"		{\n" + 
-	    		"			\"orderId\": \""+UUID.randomUUID()+"\", \n" + 
-	    		"			\"symbol\":\""+symbol+ "\" , \n" + 
-	    		"			\"orderType\": \"LIMIT\", \n" + 
-	    		"			\"limitPrice\":"+limitPrice+",\n" + 
-	    /*		"           \"limitPrice\": 69400.32,\n" + */
-	    		"			\"orderQuantity\":"+ orderqty+",\n" + 
-	    		"			\"orderSide\":\""+orderSide+"\"\n"+
-	/*    		"			\"orderSide\": \"BUY\"\n" +*/
-	    		
-	    		"		}]\n" + 
-	    		"}";
-	   
-	    StringEntity entity = new StringEntity(json);
-	    httpPost.setEntity(entity);
-	    
-	    CloseableHttpResponse response = client.execute(httpPost);
-	    
-	    System.out.println("here is the response of post request ");
-	   String jsonobj= StreamUtils.copyToString(response.getEntity().getContent(), Charsets.UTF_8);
-	   System.out.println(jsonobj);
-	   ObjectMapper mapper=new ObjectMapper();
-	   mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-	   ResultWrapper result= mapper.readValue(jsonobj, ResultWrapper.class);
-		client.close();
-		return result.getResult();
-	   
 
-}
 	
 	public void test(String symbol,String orderSide,String limitPrice,String orderqty,int index) throws IOException, ClassNotFoundException, InterruptedException {
 		
 		System.out.println("this is test case "+index+"_______________________________________________________________________________________________");
-		TestCase1 ort=new TestCase1();
-		Result result=ort.PostReq( symbol, orderSide, limitPrice, orderqty);
+		//TestCase1 ort=new TestCase1();
+		TestUtil tu=new TestUtil();
+		Result result=tu.PostReq( symbol, orderSide, limitPrice, orderqty);
 		System.out.println("here is the converted result of post request\n "+result);
 
 		Thread.sleep(9000);
@@ -88,9 +55,15 @@ public class TestCase1 {
 		System.out.println("here is the execution report "+er);
 		//symbol quantity price orderid
 		
-		if("Unknown error".equals(result.getReason())||er.getSymbol()==null) {
-			System.out.println("execution report is not generated");
+		if("Unknown error".equals(result.getReason()))
+			System.out.println("order is not placed on any venu for Unknown error");
+			
+		else {
+			if(er.getSymbol()==null&& !"Unknown error".equals(result.getReason())) {
+				System.out.println("order placed but order symbol is not seen in the execution report and this will show nothing on info.html page except order id");
 		}
+			
+		
 		else {
 		assertThat(result.getOrderId().equals(er.getOrderId()));
 		assertThat(er.getSymbol()).isEqualTo(symbol);
@@ -102,7 +75,47 @@ public class TestCase1 {
 		
 		
 		
-	
+		}
 	}
+	public void test2(String symbol,String orderSide,String limitPrice,String orderqty,int index) throws IOException, InterruptedException {
+		System.out.println("this is test case "+index+"_______________________________________________________________________________________________");
+		//TestCase1 ort=new TestCase1();
+		TestUtil tu=new TestUtil();
+		Result result=tu.PostReq( symbol, orderSide, limitPrice, orderqty);
+		System.out.println("here is the converted result of post request\n "+result);
+		Thread.sleep(9000);
+		Order order=kc.getOrder();
+		ExecutionReport er=kc.getEr();
+		if("Unknown error".equals(result.getReason()))
+			System.out.println("order is not placed on any venu for Unknown error");
+			
+		else {
+			if(er!=null&&result!=null&&er.getSymbol()==null&& !"Unknown error".equals(result.getReason())) {
+				System.out.println("order placed but order symbol is not seen in the execution report and this will show nothing on info.html page except order id");
+		}
+			else{
+				if(order!=null && er!=null) {
+				assertThat(order.getOrderId().equals(er.getOrderId()));
+				assertThat(er.getSymbol()).isEqualTo(symbol);
+				
+				assertThat(order.getSide().equals(er.getSide()));
+				
+				BigDecimal totalprice=tu.totalPrice(TestCase1.map, order);
+				BigDecimal totalqty=tu.totalPrice(TestCase1.map, order);
+				
+			
+				assertThat(totalqty).isLessThanOrEqualTo(er.getExecutedQty());
+				assertThat(totalprice).isLessThanOrEqualTo(er.getExecutedQty());
+				
+				assertThat(er.getQty()).isLessThanOrEqualTo(order.getQty());
+
+				}}}
+		System.out.println("below is the order values : ");
+		System.out.println(order);
+		System.out.println("below is the corresponding execution report value");
+		System.out.println(er);
+	}
+	
+	
 
 }
