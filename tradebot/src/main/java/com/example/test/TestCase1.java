@@ -16,6 +16,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ErrorCollector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
@@ -35,51 +38,16 @@ public class TestCase1 {
 	KafkaConfig kafkaConfig;
 	public KafkaConsumer kc;
 	public static HashMap<String,List<Order>>map=new HashMap<>() ;
+		@Rule		
+	    public ErrorCollector collector = new ErrorCollector();
 	public void setKafkaConsumer() throws ClassNotFoundException {
 		this.kc=new KafkaConsumer(this.kafkaConfig);
 	}
 	
-
-	
-	public void test(String symbol,String orderSide,String limitPrice,String orderqty,int index) throws IOException, ClassNotFoundException, InterruptedException {
-		
-		System.out.println("this is test case "+index+"_______________________________________________________________________________________________");
-		//TestCase1 ort=new TestCase1();
-		TestUtil tu=new TestUtil();
-		Result result=tu.PostReq( symbol, orderSide, limitPrice, orderqty);
-		System.out.println("here is the converted result of post request\n "+result);
-
-		Thread.sleep(9000);
-		ExecutionReport er=kc.getEr();
-		
-		System.out.println("here is the execution report "+er);
-		//symbol quantity price orderid
-		
-		if("Unknown error".equals(result.getReason()))
-			System.out.println("order is not placed on any venu for Unknown error");
-			
-		else {
-			if(er.getSymbol()==null&& !"Unknown error".equals(result.getReason())) {
-				System.out.println("order placed but order symbol is not seen in the execution report and this will show nothing on info.html page except order id");
-		}
-			
-		
-		else {
-		assertThat(result.getOrderId().equals(er.getOrderId()));
-		assertThat(er.getSymbol()).isEqualTo(symbol);
-		assertThat(orderSide.equals(er.getSide()));
-		if(orderSide.equalsIgnoreCase("SELL"))
-		assertThat(er.getPrice()).isGreaterThanOrEqualTo(new BigDecimal(limitPrice));
-		if(orderSide.equalsIgnoreCase("BUY"))
-		assertThat(er.getPrice()).isLessThanOrEqualTo(new BigDecimal(limitPrice));}
-		
-		
-		
-		}
-	}
+	@Test
 	public void test2(String symbol,String orderSide,String limitPrice,String orderqty,int index) throws IOException, InterruptedException {
 		System.out.println("this is test case "+index+"_______________________________________________________________________________________________");
-		//TestCase1 ort=new TestCase1();
+	
 		TestUtil tu=new TestUtil();
 		Result result=tu.PostReq( symbol, orderSide, limitPrice, orderqty);
 		System.out.println("here is the converted result of post request\n "+result);
@@ -95,6 +63,7 @@ public class TestCase1 {
 		}
 			else{
 				if(order!=null && er!=null) {
+					try {
 				assertThat(order.getOrderId().equals(er.getOrderId()));
 				assertThat(er.getSymbol()).isEqualTo(symbol);
 				
@@ -103,13 +72,18 @@ public class TestCase1 {
 				BigDecimal totalprice=tu.totalPrice(TestCase1.map, order);
 				BigDecimal totalqty=tu.totalPrice(TestCase1.map, order);
 				
-			
+				if(er.getExecutedQty()!=null)
 				assertThat(totalqty).isLessThanOrEqualTo(er.getExecutedQty());
-				assertThat(totalprice).isLessThanOrEqualTo(er.getExecutedQty());
-				
+				if(er.getExecutedPrice()!=null)
+				assertThat(totalprice).isLessThanOrEqualTo(er.getExecutedPrice());
+				if(er.getQty()!=null&&order.getQty()!=null)
 				assertThat(er.getQty()).isLessThanOrEqualTo(order.getQty());
 
+					}
+					catch (Throwable t) {					
+			            collector.addError(t);}	
 				}}}
+		
 		System.out.println("below is the order values : ");
 		System.out.println(order);
 		System.out.println("below is the corresponding execution report value");
