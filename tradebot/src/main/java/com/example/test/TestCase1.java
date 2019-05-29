@@ -89,6 +89,7 @@ public class TestCase1 {
 				assertThat(er.getExecutedPrice()).isNotNull();
 				if(er.getExecutedQty()!=null)*/
 				try {
+					if(totalqty!=null)
 				assertThat(totalqty).isLessThanOrEqualTo(er.getExecutedQty());}
 				catch(AssertionError e) {
 					System.out.println("AssertionError occured ...  totalqty and executed qty does'nt matched");
