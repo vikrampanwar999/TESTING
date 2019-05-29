@@ -2,6 +2,7 @@ package com.example.websocket.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class KafkaConsumer {
 	private   ExecutionReport er;
 	private 	Order order;
+	public static HashMap<String,List<Order>>ordermap=new HashMap<>() ;
 	
 	private  synchronized void consumer(ConsumerRecord<String, String> cr)  {
 		System.out.println("here is message of consumer "+cr.value());
@@ -41,6 +43,11 @@ public class KafkaConsumer {
 		ObjectMapper mapper=new ObjectMapper();
 		try {
 			Order order= mapper.readValue(er, Order.class);
+			if(!ordermap.containsKey(order.getOrderId()));
+			ordermap.put(order.getOrderId(),new ArrayList<Order>());
+			
+				ordermap.get(order.getOrderId()).add(order);
+			
 			setOrder(order);
 			System.out.println("-- order is place on the venu"+order.getMarketExchange()+"  --------------------------------------+++++++++++++++++++++++++++++++++++++++++++"+order.getOrderStatus());
 		} catch (IOException e) {

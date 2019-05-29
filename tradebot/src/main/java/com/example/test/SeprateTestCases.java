@@ -21,7 +21,7 @@ public class SeprateTestCases {
 	@Autowired
 	KafkaConfig kafkaConfig;
 	public KafkaConsumer kc;
-	public static HashMap<String,List<Order>>map=new HashMap<>() ;
+	
 	
 	public void setKafkaConsumer() throws ClassNotFoundException {
 		this.kc=new KafkaConsumer(this.kafkaConfig);
@@ -86,6 +86,7 @@ public class SeprateTestCases {
 		Result result=tu.PostReq( symbol, orderSide, limitPrice, orderqty);
 		System.out.println("here is the converted result of post request\n "+result);
 		Thread.sleep(9000);
+		
 		Order order=kc.getOrder();
 		ExecutionReport er=kc.getEr();
 		if("Unknown error".equals(result.getReason()))
@@ -108,7 +109,7 @@ public class SeprateTestCases {
 		if("Unknown error".equals(result.getReason()))
 			System.out.println("order is not placed on any venu for Unknown error");
 		//BigDecimal totalprice=tu.totalPrice(TestCase1.map, order);
-		BigDecimal totalqty=tu.totalQty(TestCase1.map, order);
+		BigDecimal totalqty=tu.totalQty(KafkaConsumer.ordermap, order);
 		assertThat(totalqty).isLessThanOrEqualTo(er.getQty());
 		//assertThat(er.getQty()).isEqualTo(order.getQty()); 
 		//assertThat(order.getSymbol()).isEqualTo(symbol);
@@ -127,7 +128,7 @@ public class SeprateTestCases {
 		ExecutionReport er=kc.getEr();
 		if("Unknown error".equals(result.getReason()))
 			System.out.println("order is not placed on any venu for Unknown error");
-		BigDecimal totalprice=tu.totalPrice(TestCase1.map, order);
+		BigDecimal totalprice=tu.totalPrice(KafkaConsumer.ordermap, order);
 		assertThat(totalprice).isLessThanOrEqualTo(er.getQty());
 		kc.setEr(null);
 		kc.setOrder(null);

@@ -34,16 +34,13 @@ public class TestUtil {
 				if(o.getExecutedQty()!=null)
 				qty=qty.add(o.getExecutedQty());
 			}
-			list.add(order);
-			map.put(order.getOrderId(), list);
+			
 			return qty;
 		}
-		else {
-			List<Order>list=new ArrayList<>();
-			list.add(order);
-			map.put(order.getOrderId(), list);
+		else {//though it shouldn't get executed
+			return order.getExecutedQty();
 		}
-		return order.getExecutedQty();
+		
 	
 }
 	public BigDecimal totalPrice(HashMap<String,List<Order>>map,Order order) {
@@ -54,16 +51,12 @@ public class TestUtil {
 				if(o.getExecutedPrice()!=null)
 				price=price.add(o.getExecutedPrice());
 			}
-			list.add(order);
-			map.put(order.getOrderId(), list);
 			return price;
 		}
-		else {
-			List<Order>list=new ArrayList<>();
-			list.add(order);
-			map.put(order.getOrderId(), list);
+		else {//though it shouldn't get executed
+			return order.getExecutedPrice();
 		}
-		return order.getExecutedPrice();
+		
 	
 }
 	

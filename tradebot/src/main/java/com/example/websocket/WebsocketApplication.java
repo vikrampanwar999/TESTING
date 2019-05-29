@@ -23,7 +23,7 @@ import com.example.test.TestCases;
 @EnableJpaRepositories("com.example.repository")
 @ComponentScan({"com.example"})
 public class WebsocketApplication implements CommandLineRunner{
-	//@Autowired TestCases tcases;
+	@Autowired TestCases tcases;
 	@Autowired Stcwrapper t;
     public static void main(String[] args) throws ClassNotFoundException {
         SpringApplication.run(WebsocketApplication.class, args);
@@ -35,18 +35,7 @@ public class WebsocketApplication implements CommandLineRunner{
 	public void run(String... args) throws Exception {
 		 // org.junit.runner.JUnitCore.main(t.runtcs("BTCUSDT","BUY","8600.00","0.601",1));
 		//t.runtcs(symbol, orderSide, limitPrice, orderqty, index);
-		Thread.sleep(13000);
-		t.runtcs("BTCUSDT","BUY","8600.00","0.601",1);//trade account balance is not enough
-		Thread.sleep(13000);
-		t.runtcs("BTCUSDT","BUY","8900.00","0.001",2);//invalid-amount
-		Thread.sleep(13000);
-		t.runtcs("BTCUSDT","SELL","8060.00","0.091",3);//Unknown error
-		Thread.sleep(13000);
-		t.runtcs("BTCUSD","SELL","8000.00","0.019",4);//CANCELLED->null reason`
-		Thread.sleep(13000);
-		t.runtcs("BTCUSD","BUY","8800.00","4.001",5);// Insufficient funds (HTTP status code: 400)
-		Thread.sleep(13000);
-		t.runtcs("BTCUSD","BUY","8070.00","0.010",6);
+		tcases.test();
 		
 	}
 }

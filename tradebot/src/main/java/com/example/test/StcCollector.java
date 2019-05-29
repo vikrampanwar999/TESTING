@@ -2,6 +2,8 @@ package com.example.test;
 
 
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -46,8 +48,8 @@ public class StcCollector {
 		ExecutionReport er=kc.getEr();
 		if("Unknown error".equals(result.getReason()))
 			System.out.println("order is not placed on any venu for Unknown error");
-		collector.checkThat(order.getSymbol(),equals("b"));
-		collector.checkThat(order.getSymbol()).isEqualTo(symbol);
+		//assertThat(order.getSymbol(),equals("b"));
+		assertThat(order.getSymbol()).isEqualTo(symbol);
 		kc.setEr(null);
 		kc.setOrder(null);
 	}
@@ -63,8 +65,8 @@ public class StcCollector {
 		ExecutionReport er=kc.getEr();
 		if("Unknown error".equals(result.getReason()))
 			System.out.println("order is not placed on any venu for Unknown error");
-		collector.checkThat(er.getOrderId()).isEqualTo(order.getOrderId());
-		//collector.checkThat(order.getSymbol()).isEqualTo(symbol);
+		assertThat(er.getOrderId()).isEqualTo(order.getOrderId());
+		//assertThat(order.getSymbol()).isEqualTo(symbol);
 		kc.setEr(null);
 		kc.setOrder(null);
 	}
@@ -80,8 +82,8 @@ public class StcCollector {
 		ExecutionReport er=kc.getEr();
 		if("Unknown error".equals(result.getReason()))
 			System.out.println("order is not placed on any venu for Unknown error");
-		collector.checkThat(er.getSide()).isEqualTo(order.getSide().toString()); 
-		//collector.checkThat(order.getSymbol()).isEqualTo(symbol);
+		assertThat(er.getSide()).isEqualTo(order.getSide().toString()); 
+		//assertThat(order.getSymbol()).isEqualTo(symbol);
 		kc.setEr(null);
 		kc.setOrder(null);
 	}
@@ -97,8 +99,8 @@ public class StcCollector {
 		ExecutionReport er=kc.getEr();
 		if("Unknown error".equals(result.getReason()))
 			System.out.println("order is not placed on any venu for Unknown error");
-		collector.checkThat(er.getExecutedQty()).isEqualTo(order.getExecutedQty()); 
-		//collector.checkThat(order.getSymbol()).isEqualTo(symbol);
+		assertThat(er.getExecutedQty()).isEqualTo(order.getExecutedQty()); 
+		//assertThat(order.getSymbol()).isEqualTo(symbol);
 		kc.setEr(null);
 		kc.setOrder(null);
 	}
@@ -116,9 +118,9 @@ public class StcCollector {
 			System.out.println("order is not placed on any venu for Unknown error");
 		//BigDecimal totalprice=tu.totalPrice(TestCase1.map, order);
 		BigDecimal totalqty=tu.totalQty(TestCase1.map, order);
-		collector.checkThat(totalqty).isLessThanOrEqualTo(er.getQty());
-		//collector.checkThat(er.getQty()).isEqualTo(order.getQty()); 
-		//collector.checkThat(order.getSymbol()).isEqualTo(symbol);
+		assertThat(totalqty).isLessThanOrEqualTo(er.getQty());
+		//assertThat(er.getQty()).isEqualTo(order.getQty()); 
+		//assertThat(order.getSymbol()).isEqualTo(symbol);
 		kc.setEr(null);
 		kc.setOrder(null);
 	}
@@ -135,7 +137,7 @@ public class StcCollector {
 		if("Unknown error".equals(result.getReason()))
 			System.out.println("order is not placed on any venu for Unknown error");
 		BigDecimal totalprice=tu.totalPrice(TestCase1.map, order);
-		collector.checkThat(totalprice).isLessThanOrEqualTo(er.getQty());
+		assertThat(totalprice).isLessThanOrEqualTo(er.getQty());
 		kc.setEr(null);
 		kc.setOrder(null);
 	}
