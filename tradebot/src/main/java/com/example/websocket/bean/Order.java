@@ -278,7 +278,15 @@ public enum OrderReportType {
 	private OrderStatus          orderStatus;
 	private String               exchangeAccountId; // keep track of accounts on their venue
 	private boolean              childOrder; // indicates wether it is a child or not
-	
+	private String               childOrderId;
+	public String getChildOrderId() {
+		return childOrderId;
+	}
+
+	public void setChildOrderId(String childOrderId) {
+		this.childOrderId = childOrderId;
+	}
+
 	// for different symbols in different exchanges, the precision may be different
 	private int					 pricePrecision; 
 	private int					 qtyPrecision; // quantity precision

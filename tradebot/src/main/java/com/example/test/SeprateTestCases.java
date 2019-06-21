@@ -105,7 +105,7 @@ public class SeprateTestCases {
 		System.out.println("here is the converted result of post request\n "+result);
 		Thread.sleep(9000);
 		Order order=kc.getOrder();
-		ExecutionReport er=kc.getEr();
+		ExecutionReport er=kc.getEr();//use last filled qty and last price
 		if("Unknown error".equals(result.getReason()))
 			System.out.println("order is not placed on any venu for Unknown error");
 		//BigDecimal totalprice=tu.totalPrice(TestCase1.map, order);

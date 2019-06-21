@@ -29,8 +29,31 @@ public class KafkaConfig {
 	@Value("${kafka.bootstrap-servers}")
 	private String bootstrapServers;
 	
+	@Value("${kafka.consumer-topic-transaction}")
+	private String orderTransaction;
+	
 	@Value("${kafka.consumer-topic-ordersuffix}")
 	private String orderTopicSuffix;
+	@Value("${kafka.consumer-topic-ExecutionInternal}")
+	private String ExeInternal;
+	@Value("${kafka.producer-topic-prefix-orderInternal}")
+	private String orInternal;
+
+	public String getOrInternal() {
+		return orInternal;
+	}
+
+	public void setOrInternal(String orInternal) {
+		this.orInternal = orInternal;
+	}
+
+	public String getExeInternal() {
+		return ExeInternal;
+	}
+
+	public void setExeInternal(String exeInternal) {
+		ExeInternal = exeInternal;
+	}
 
 	@Value("${kafka.group-id}")
 	private String groupId;
@@ -155,6 +178,14 @@ public class KafkaConfig {
 
 	public void setorderTopicSuffix(String orderTopicSuffix) {
 		this.orderTopicSuffix = orderTopicSuffix;
+	}
+
+	public String getOrderTransaction() {
+		return orderTransaction;
+	}
+
+	public void setOrderTransaction(String orderTransaction) {
+		this.orderTransaction = orderTransaction;
 	}
 	
 

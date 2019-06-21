@@ -26,6 +26,7 @@ public class Scheduler {
     @Scheduled(fixedRate=30000) 
     public void autoConn() throws InterruptedException {   
    
+   
    	System.out.println(orderConfiguration.getBuy_url());
 	System.out.println(orderConfiguration.getSymbol());
     	 StompClient s =new StompClient();

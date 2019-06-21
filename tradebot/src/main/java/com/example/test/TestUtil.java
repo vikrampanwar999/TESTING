@@ -32,7 +32,8 @@ public class TestUtil {
 			List<Order>list=map.get(order.getOrderId());
 			for(Order o:list) {
 				if(o.getExecutedQty()!=null)
-				qty=qty.add(o.getExecutedQty());
+				//qty=qty.add(o.getExecutedQty());
+					qty=qty.add(o.getLeavesQty());
 			}
 			
 			return qty;
@@ -62,13 +63,13 @@ public class TestUtil {
 	
 	public  Result PostReq(String symbol,String orderSide,String limitPrice,String orderqty) throws  IOException {
 	    CloseableHttpClient client = HttpClients.createDefault();
-	    HttpPost httpPost = new HttpPost("http://54.145.144.54:20004/exchange/openAPI?signature=12345");
+	    HttpPost httpPost = new HttpPost("http://3.93.103.201:20006/exchange/openAPI?signature=12345");
 	    String json="{\n" + 
 	    		"	\"method\":\"exchange.insertOrder\",\n" + 
 	    		"	\"params\":[\n" + 
 	    		"		\"a\", \n" + 
 	    		"		{\n" + 
-	    		"			\"orderId\": \""+UUID.randomUUID()+"\", \n" + 
+	    		"			\"orderId\": \""+symbol+":"+UUID.randomUUID()+"\", \n" + 
 	    		"			\"symbol\":\""+symbol+ "\" , \n" + 
 	    		"			\"orderType\": \"LIMIT\", \n" + 
 	    		"			\"limitPrice\":"+limitPrice+",\n" + 

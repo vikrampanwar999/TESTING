@@ -131,6 +131,9 @@
 			<artifactId>assertj-core</artifactId>
 			
 		</dependency>
+		
+		<!-- powermock setup -->
+		
 
 
 

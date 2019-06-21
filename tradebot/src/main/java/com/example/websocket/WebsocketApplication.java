@@ -13,8 +13,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import com.example.test.KafkaClientTest;
 import com.example.test.Stcwrapper;
 import com.example.test.TestCases;
+import com.example.websocket.conf.KafkaConfig;
 
 @SpringBootApplication
 @EnableScheduling
@@ -25,6 +27,9 @@ import com.example.test.TestCases;
 public class WebsocketApplication implements CommandLineRunner{
 	@Autowired TestCases tcases;
 	@Autowired Stcwrapper t;
+	//@Autowired KafkaClientTest kct;
+	//new changes
+	@Autowired KafkaConfig kc;
     public static void main(String[] args) throws ClassNotFoundException {
         SpringApplication.run(WebsocketApplication.class, args);
         
@@ -35,7 +40,9 @@ public class WebsocketApplication implements CommandLineRunner{
 	public void run(String... args) throws Exception {
 		 // org.junit.runner.JUnitCore.main(t.runtcs("BTCUSDT","BUY","8600.00","0.601",1));
 		//t.runtcs(symbol, orderSide, limitPrice, orderqty, index);
-		tcases.test();
+		tcases.test(); //uncomment this to run the test cases
+		//kct.setKafkaConsumer();
+		
 		
 	}
 }
