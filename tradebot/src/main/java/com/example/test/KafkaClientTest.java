@@ -30,6 +30,6 @@ public class KafkaClientTest {
 		order.setPrice(new BigDecimal(9000));
 		order.setSide(OrderSide.BUY);
 		order.setQty(new BigDecimal(.10));
-		kc.sendkafka(topic, order);
+		//kc.sendkafka(topic, order);
 	}
 }

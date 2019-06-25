@@ -17,7 +17,7 @@ public class OrderTransaction {
 	private long refreshedAt;
 	private String memberId;
 	private String orderId;
-	private OrderStatus status;
+	private String status;
 	private OrderType orderType;
 	private OrderSide orderSide;
 	private BigDecimal quantity;
@@ -96,10 +96,10 @@ public class OrderTransaction {
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
 	}
-	public OrderStatus getStatus() {
+	public String getStatus() {
 		return status;
 	}
-	public void setStatus(OrderStatus status) {
+	public void setStatus(String status) {
 		this.status = status;
 	}
 	public OrderType getOrderType() {
@@ -197,5 +197,19 @@ public class OrderTransaction {
 	}
 	public void setLastFilledIsTaker(boolean lastFilledIsTaker) {
 		this.lastFilledIsTaker = lastFilledIsTaker;
+	}
+	@Override
+	public String toString() {
+		return "OrderTransaction [matchingEngineLogId=" + matchingEngineLogId + ", globalMatchingEngineLogId="
+				+ globalMatchingEngineLogId + ", matchingEngineId=" + matchingEngineId + ", logCreatedAt="
+				+ logCreatedAt + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", refreshedAt="
+				+ refreshedAt + ", memberId=" + memberId + ", orderId=" + orderId + ", status=" + status
+				+ ", orderType=" + orderType + ", orderSide=" + orderSide + ", quantity=" + quantity + ", limitPrice="
+				+ limitPrice + ", openQuantity=" + openQuantity + ", filledCumulativeQuantity="
+				+ filledCumulativeQuantity + ", dealtCurrency=" + dealtCurrency + ", quoteCurrency=" + quoteCurrency
+				+ ", dealtAmount=" + dealtAmount + ", quoteAmount=" + quoteAmount + ", lastFilledPrice="
+				+ lastFilledPrice + ", lastFilledQty=" + lastFilledQty + ", cancelledQty=" + cancelledQty
+				+ ", linkedHash=" + linkedHash + ", matchId=" + matchId + ", lastFilledCreatedAt=" + lastFilledCreatedAt
+				+ ", lastFilledIsTaker=" + lastFilledIsTaker + "]";
 	}
 }

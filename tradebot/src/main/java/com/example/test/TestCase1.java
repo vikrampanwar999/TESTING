@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -42,12 +43,21 @@ public class TestCase1 {
 	
 	@Test
 	public void test2(String symbol,String orderSide,String limitPrice,String orderqty,int index) throws IOException, InterruptedException {
-		//System.out.println("this is test case "+index+"_______________________________________________________________________________________________");
+		System.out.println("this is test case "+index+"_______________________________________________________________________________________________");
 		
 		LOGGER.debug("Starting running the test case No", index);
 		TestUtil tu=new TestUtil();
 		Result result=tu.PostReq( symbol, orderSide, limitPrice, orderqty);
 		//System.out.println("here is the converted result of post request\n "+result);
+		if("PENDING_SUBMIT".equals(result.getOrderStatus())) {
+			if(!KafkaConsumer.flowReport.containsKey(result.getOrderId()))
+				KafkaConsumer.flowReport.put(result.getOrderId(),new ArrayList<String>());
+			String s=" order has been placed on the gateway ";
+			KafkaConsumer.flowReport.get(result.getOrderId()).add(s);
+		}
+		else {
+			System.out.println("Not pending submit");
+		}
 		LOGGER.debug("\"here is the result of post request from Result object \\n", result);
 		Thread.sleep(30000);
 		Order order=kc.getOrder();
@@ -134,7 +144,9 @@ public class TestCase1 {
 
 					}
 	
-				}}}
+				}}
+		System.out.println("here is the execution flow report "+KafkaConsumer.flowReport.get(result.getOrderId()));
+	}
 		
 		/*System.out.println("below is the order values : ");
 		System.out.println(order);

@@ -67,7 +67,7 @@ public class TestUtil {
 	    String json="{\n" + 
 	    		"	\"method\":\"exchange.insertOrder\",\n" + 
 	    		"	\"params\":[\n" + 
-	    		"		\"a\", \n" + 
+	    		"		\"A\", \n" + 
 	    		"		{\n" + 
 	    		"			\"orderId\": \""+symbol+":"+UUID.randomUUID()+"\", \n" + 
 	    		"			\"symbol\":\""+symbol+ "\" , \n" + 

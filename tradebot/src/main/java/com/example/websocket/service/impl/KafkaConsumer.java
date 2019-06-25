@@ -4,16 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.MessageListener;
@@ -21,8 +15,8 @@ import org.springframework.kafka.listener.MessageListener;
 import com.example.websocket.bean.ExecutionReport;
 import com.example.websocket.bean.Order;
 import com.example.websocket.bean.OrderTransaction;
+import com.example.websocket.bean.OrderTransactionWrapper;
 import com.example.websocket.conf.KafkaConfig;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class KafkaConsumer {
@@ -31,18 +25,25 @@ public class KafkaConsumer {
 	private OrderTransaction ot;
 	public static HashMap<String,List<Order>>ordermap=new HashMap<>() ;
 	public static HashMap<String,List<String>>transactionmap=new HashMap<>() ;
+	public static HashMap<String,List<String>>flowReport=new HashMap<>() ;
 	//private KafkaTemplate<String, String> kt;
 	//private ObjectMapper om=new ObjectMapper();
 	
 	
 		
-	private  synchronized void consumer(ConsumerRecord<String, String> cr)  {
+	private  synchronized void OrderInternalconsumer(ConsumerRecord<String, String> cr)  {
 		System.out.println("here is message of consumer "+cr.value());
 		String er=cr.value();
 		ObjectMapper mapper=new ObjectMapper();
+		System.out.println("record return from venus "+er);
+
 		try {
 			ExecutionReport report= mapper.readValue(er, ExecutionReport.class);
 			setEr(report);
+			if(!flowReport.containsKey(report.getOrderId()))
+				flowReport.put(report.getOrderId(),new ArrayList<String>());
+			String s="DEV.E55PRIME.ORDERS.INTERNAL channel recieved order with status "+report.getOrderStatus();
+			flowReport.get(report.getOrderId()).add(s);
 			System.out.println("here is the order status from execution report"+report.getOrderStatus());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -54,14 +55,24 @@ public class KafkaConsumer {
 	
 	private  synchronized void transactionconsumer(ConsumerRecord<String, String> cr)  {
 		System.out.println("here is message of transaction *****************************************************************************"+cr.value());
-		String tr=cr.value();
+		String tr=cr.value().substring(10);
+		System.out.println("tr "+tr);
 		ObjectMapper mapper=new ObjectMapper();
 		try {
-			OrderTransaction report= mapper.readValue(tr, OrderTransaction.class);
-			if(!transactionmap.containsKey(report.getOrderId()))
-			transactionmap.put(report.getOrderId(),new ArrayList<String>());
 			
-			transactionmap.get(report.getOrderId()).add(report.getStatus().toString());
+			//OrderTransactionWrapper reportwrapper= mapper.readValue(tr, OrderTransactionWrapper.class);
+			OrderTransaction report=mapper.readValue(tr, OrderTransaction.class);
+			System.out.println("report  at transaction channel status "+report.getStatus());
+			
+		
+			
+			if(!transactionmap.containsKey(report.getOrderId())) {
+			transactionmap.put(report.getOrderId(),new ArrayList<String>());
+			}
+			transactionmap.get(report.getOrderId()).add(report.getStatus());
+			System.out.println("report  at transaction channel transformed "+report.toString());
+			System.out.println("report  at transaction channel raw "+tr);
+		//	System.out.println("report  at transaction channel raw ttr "+ttr);
 			
 			
 			
@@ -70,7 +81,15 @@ public class KafkaConsumer {
 			}
 			setOt(report);
 			System.out.println("here is the order id from transaction consumer  "+report.getOrderId()+"  here is the stauts of this order "+report.getStatus());
-			
+			//if("PENDING_SUBMIT".equals(report.getStatus())||"SUBMITTED".equals(report.getStatus())) {
+				if(!flowReport.containsKey(report.getOrderId()))
+					flowReport.put(report.getOrderId(),new ArrayList<String>());
+				String s="DEV.E55.ORDERTRANSACTIONS channel recieved order with status "+report.getStatus();
+				flowReport.get(report.getOrderId()).add(s);
+			/*}
+			else {
+				
+			}*/
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -91,6 +110,12 @@ public class KafkaConsumer {
 			
 			setOrder(order);
 			System.out.println("-- order is place on the venu"+order.getMarketExchange()+"  --------------------------------------+++++++++++++++++++++++++++++++++++++++++++ here is the status "+order.getOrderStatus());
+			if(!flowReport.containsKey(order.getOrderId()))
+				flowReport.put(order.getOrderId(),new ArrayList<String>());
+			String s="order has been placed on "+order.getMarketExchange();
+			flowReport.get(order.getOrderId()).add(s);
+		
+		
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -103,6 +128,22 @@ public class KafkaConsumer {
 		System.out.println("here is message of Sor consumer "+cr.value());
 		String er=cr.value();
 		System.out.println(er);
+		if(er!=null) {
+			ObjectMapper mapper=new ObjectMapper();
+			try {
+				ExecutionReport report= mapper.readValue(er, ExecutionReport.class);
+				if(!flowReport.containsKey(report.getOrderId()))
+				flowReport.put(report.getOrderId(),new ArrayList<String>());
+				if(report.getOrderStatus()!=null) {
+					String s="SOR has sent an "+report.getOrderStatus().toString()+" on ExecutionReportInternal Channel ";
+				flowReport.get(report.getOrderId()).add(s);
+				}
+			
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			}
+		}
 	}
 
 	public void setOrder(Order order) {
@@ -123,6 +164,23 @@ public class KafkaConsumer {
                 		System.out.println("recieved Records "+record);
                 		if(record.topic().equals(kafkaConfig.getOrderTransaction())) {
                 			//need to invoke diffrent methods based on this
+                			this.transactionconsumer(record);
+                		}
+                		else if(record.topic().equals(kafkaConfig.getExeInternal())) {
+                			//need to invoke diffrent methods based on this
+                			this.Sorconsumer(record);
+                		}
+                		else if(record.topic().equals(kafkaConfig.getOrInternal())) {
+                			//need to invoke diffrent methods based on this
+                			this.OrderInternalconsumer(record);
+                		}
+                		else if(record.topic().equals(kafkaConfig.getProducerTopicPrefix())) {
+                			//need to invoke diffrent methods based on this
+                			this.Orderconsumer(record);
+                		}
+                		else if(record.topic().startsWith(kafkaConfig.getProducerTopicPrefix())&&endsWithAnyOFString(record.topic(),kafkaConfig.getorderTopicSuffix().split(","))) {
+                			System.out.println("inside the venu");
+                			this.Orderconsumer(record);
                 		}
                 	}); 
 		ConcurrentMessageListenerContainer<String, String> container =
@@ -155,7 +213,7 @@ public class KafkaConsumer {
 		ContainerProperties containerProperties = new ContainerProperties(kafkaConfig.getConsumerTopicPrefix());
 		containerProperties.setMessageListener(
                 (MessageListener<String, String>) record -> {
-                		this.consumer(record);
+                		//this.OrderInternalconsumer(record);
                 	}); 
 		ConcurrentMessageListenerContainer<String, String> container =
 		        new ConcurrentMessageListenerContainer<>(
@@ -182,6 +240,13 @@ public OrderTransaction getOt() {
 
 public void setOt(OrderTransaction ot) {
 	this.ot = ot;
+}
+private boolean endsWithAnyOFString(String s,String arr[]) {
+	for(String o:arr) {
+		if(s.contains(o))
+			return true;
+	}
+	return false;
 }
 
 
