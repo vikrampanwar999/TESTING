@@ -55,7 +55,7 @@ public class WebsocketApplication implements CommandLineRunner{
 		//kct.setKafkaConsumer();
 		
 		try {
-		FileWriter fw=new FileWriter("D:\\testout.txt",true);
+		FileWriter fw=new FileWriter("D:\\TestReports\\"+getDate()+".txt",true);
 		fw.append(getDate()+"#############################################################################\n");
 		KafkaConsumer kconsumer=new KafkaConsumer(kc);
 		Set<Entry<String, List<String>>> records=kconsumer.flowReport.entrySet();

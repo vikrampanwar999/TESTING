@@ -45,7 +45,7 @@ public class TestCase1 {
 	public void test2(String symbol,String orderSide,String limitPrice,String orderqty,int index) throws IOException, InterruptedException {
 		System.out.println("this is test case "+index+"_______________________________________________________________________________________________");
 		
-		LOGGER.debug("Starting running the test case No", index);
+		LOGGER.debug("Starting running the test case No "+index);
 		TestUtil tu=new TestUtil();
 		Result result=tu.PostReq( symbol, orderSide, limitPrice, orderqty);
 		//System.out.println("here is the converted result of post request\n "+result);
@@ -54,6 +54,7 @@ public class TestCase1 {
 				KafkaConsumer.flowReport.put(result.getOrderId(),new ArrayList<String>());
 			String s=" order has been placed on the gateway ";
 			KafkaConsumer.flowReport.get(result.getOrderId()).add(s);
+			KafkaConsumer.flowReport.get(result.getOrderId()).add("test case no "+String.valueOf(index));
 		}
 		else {
 			System.out.println("Not pending submit");
