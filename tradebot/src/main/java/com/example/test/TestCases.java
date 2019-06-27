@@ -12,19 +12,23 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.example.websocket.conf.KafkaConfig;
+import com.example.websocket.util.PrintFile;
+
 @Component
 public class TestCases {
 	@Autowired
 	TestCase1 tc1;
-
-	public void test() throws ClassNotFoundException, InterruptedException, IOException {
+	private KafkaConfig kc;
+	public void test(KafkaConfig kc1) throws ClassNotFoundException, InterruptedException, IOException {
+		this.kc=kc1;
 		tc1.setKafkaConsumer();
 		Thread.sleep(5000);
 		Thread.sleep(13000);
 
-		ExecutorService executor = Executors.newFixedThreadPool(10);
+		ExecutorService executor = Executors.newFixedThreadPool(100);
 		List<Future<?>> lf=new ArrayList<Future<?>>();
-		for (int i = 0; i <5; i++) {
+		for (int i = 0; i <25; i++) {
 			Future<?> p=executor.submit(new testcaseRunner());
 			lf.add(p);
 		}
@@ -35,6 +39,16 @@ public class TestCases {
 				e.printStackTrace();
 			}
 		}
+		try{tc1.checkTransactionMap();
+		tc1.checkExeMap();
+		
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		finally {
+			PrintFile.printReport(kc);
+		}
 		//executor.awaitTermination(45,TimeUnit.MINUTES);
 	}
 
@@ -43,45 +57,122 @@ public class TestCases {
 		@Override
 		public void run() {
 			try {
-				tc1.test2("BTCUSDT", "BUY", "14000.00", "0.0007801", 1);// trade account balance is not enough
+				/*tc1.test2("BTCUSDT", "BUY", "14000.00", "-0.0007801", " 1 negative quantity on buy ");// pass rejected  by sor
 				Thread.sleep(13000);
-				tc1.test2("BTCUSDT", "BUY", "15000.00", "0.000087651", 2);// invalid-amount
+				tc1.test2("BTCUSDT", "BUY", "-15000.00", "0.000087651", " 2 negative price on buy ");// pass rejected  by sor
 				Thread.sleep(13000);
-				tc1.test2("BTCUSDT", "SELL", "9500.00", "0.00000091", 3);// Unknown error
+				tc1.test2("BTCUSDT", "SELL", "9500.00", "-0.00000091", " 3 negative quantity on sell ");// pass rejected  by sor
 				Thread.sleep(13000);
-				tc1.test2("BTCUSD", "SELL", "14500.00", "0.019", 4);// CANCELLED->null reason`
+				tc1.test2("BTCUSD", "SELL", "-14500.00", "0.019", " 4 negative price on sell ");// pass rejected  by sor
 				Thread.sleep(13000);
-				tc1.test2("BTCUSD", "BUY", "14500.00", "0.000031", 5);// Insufficient funds (HTTP status code: 400)
+				tc1.test2("BTCUSD", "SELLing", "14500.00", "0.000031", "5 incorrect side");//  pass rejected  by sor
 				Thread.sleep(13000);
-				tc1.test2("BTCUSD", "BUY", "14400.00", "0.01000009", 6);// partial filled -> ORDER_EXEC_REPORT
+				tc1.test2("BTCUSD", "BUY45", "14400.00", "0.01000009", "6 incorrect side");//  pass rejected  by sor
 				Thread.sleep(13000);
-				tc1.test2("BTCUSD", "BUY", "14003.00", "0.0000345", 7);
+				
+				tc1.test2("BTCUSDPP", "BUY", "14003.00", "0.0000345", "7 incorrect symbol");//pass rejected
 				Thread.sleep(13000);
-				tc1.test2("BTCUSD", "BUY", "14000.00", "0.00000020", 8);
+				tc1.test2("BTCUSD\\", "BUY", "14000.00", "0.00000020", "8 incorrect symbol");// failed internal server error
 				Thread.sleep(13000);
-				tc1.test2("BTCUSD", "SELL", "9070.00", "0.000000010", 9);
+				
+				tc1.test2("BTCUSD", "SELL\\", "9070.00", "0.000000010", " 9 slash");//failed internal server error
 				Thread.sleep(13000);
-				tc1.test2("BTCUSDT", "BUY", "14800.00", "0.0000041", 10);// Insufficient funds (HTTP status code: 400)
+				tc1.test2("BTCUSDT", "BUY\\", "14800.00", "0.0000041", " 10 slash");//failed internal server error
 				Thread.sleep(13000);
-				tc1.test2("BTCUSDT", "BUY", "14300.00", "0.0004010", 11);// partial filled -> ORDER_EXEC_REPORT
+				tc1.test2("BTCUSDT", "BUY", "14300.00", "0..0004010", " 11 double point");//failed internal server error
 				Thread.sleep(13000);
-				tc1.test2("BTCUSDT", "BUY", "14200.00", "0.0000810", 12);
+				tc1.test2("BTCUSDT", "BUY", "14200..00", "0.0000810", " 12 double point");//failed internall server error
 				Thread.sleep(13000);
-				tc1.test2("BTCUSDT", "BUY", "14000.00", "0.015", 13);
+				tc1.test2("BTCUSDT", "BUY", "14000.00", "0.00000001", "13 low qty");//pass cancelled after trying on some venus
 				Thread.sleep(13000);
-				tc1.test2("LTCBTC", "SELL", "10070.00", "0.00000010", 14);
+				tc1.test2("LTCBTC", "SELL", "10070.00", "0.00000003450", "14 extreme low qty ");//pass rejected by post request
 				Thread.sleep(13000);
-				tc1.test2("BTCUSDT", "BUY", "15000.00", "0.001000090", 15);
+				tc1.test2("BTCUSDT", "SELL", "11000.00", "0.00000091", "15 low qty sell");//pass cancelled after placing on few venus
 				Thread.sleep(13000);
-				tc1.test2("BTCUSDT", "BUY", "15000.00", "0.00000165", 16);
+				tc1.test2("BTCUSDT", "SELL", "11000.00", "0.00900165", "16 medium qty sell");//some bug 1853flow 
 				Thread.sleep(13000);
-				tc1.test2("BTCUSDT", "BUY", "15500.00", "0.00001230", 17);
+				tc1.test2("BTCUSDT", "SELL", "11500.00", "0.10001230", "17 high qty sell");//cancelled
 				Thread.sleep(13000);
-				tc1.test2("BTCUSDT", "SELL", "12500.00", "0.00900015", 18);
+				tc1.test2("BTCUSDT", "SELL", "11500.00", "0.259","18 EXTREME HIGH QTY SELL");//cancelled 
 				Thread.sleep(13000);
+				
+				tc1.test2("BTCUSDT", "BUY", "14000.00", "0.0007801", " 1 ");
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSDT", "BUY", "15000.00", "0.000087651", " 2");
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSDT", "SELL", "9500.00", "0.00000091", " 3");
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSD", "SELL", "14500.00", "0.019", " 4 ");
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSD", "SELL", "14500.00", "0.000031", "5 ");//  
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSD", "BUY", "14400.00", "0.01000009", "6 ");//  
+				Thread.sleep(13000);                                                           
+				                                                                               
+				tc1.test2("BTCUSD", "BUY", "14003.00", "0.0000345", "7 ");//p
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSD", "BUY", "14000.00", "0.00000020", "8");//
+				Thread.sleep(13000);                                                           
+				                                                                               
+				tc1.test2("BTCUSD", "SELL", "9070.00", "0.000000010", " 9");//failed in
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSDT", "BUY", "14800.00", "0.0000041", " 10 ");//failed in
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSDT", "BUY", "14300.00", "0.0004010", " 11");//fai
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSDT", "BUY", "14200.00", "0.0000810", " 12 ");//fai
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSDT", "BUY", "14000.00", "0.00000001", "13 low qty");//pass canc
+				Thread.sleep(13000);                                                           
+				tc1.test2("LTCBTC", "SELL", "10070.00", "0.00000003450", "14 extreme low qty ");
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSDT", "SELL", "11000.00", "0.00000091", "15 low qty sell");//pas
+				Thread.sleep(13000);                                                           
+				
+				tc1.test2("BTCUSDT", "SELL", "11000.00", "0.00900165", "16 medium qty sell");//
+				Thread.sleep(13000);                222combined txt
+				*/
+				tc1.test2("BTCUSDT", "BUY", "14000.00", "0.0012", " 1 ");
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSDT", "BUY", "15000.00", "0.012", " 2");
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSDT", "SELL", "9500.00", "0.014", " 3");
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSD", "SELL", "14500.00", "0.0019", " 4 ");
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSD", "SELL", "14500.00", "0.0031", "5 ");//  
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSD", "BUY", "14400.00", "0.0045", "6 ");//  
+				Thread.sleep(13000);                                                           
+				                                                                               
+				tc1.test2("BTCUSD", "BUY", "14003.00", "0.0345", "7 ");//p
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSD", "BUY", "14000.00", "0.0020", "8");//
+				Thread.sleep(13000);                                                           
+				                                                                               
+				tc1.test2("BTCUSD", "SELL", "9070.00", "0.0010", " 9");//failed in
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSDT", "BUY", "14800.00", "0.0041", " 10 ");//failed in
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSDT", "BUY", "14300.00", "0.004010", " 11");//fai
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSDT", "BUY", "14200.00", "0.00810", " 12 ");//fai
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSDT", "BUY", "14000.00", "0.001", "13 low qty");//pass canc
+				Thread.sleep(13000);                                                           
+				tc1.test2("LTCBTC", "SELL", "10070.00", "0.0003", "14 extreme low qty ");
+				Thread.sleep(13000);                                                           
+				tc1.test2("BTCUSDT", "SELL", "11000.00", "0.0014", "15 low qty sell");//pas
+				Thread.sleep(13000);                                                           
+				
+				tc1.test2("BTCUSDT", "SELL", "11000.00", "0.0024", "16 medium qty sell");//
+				Thread.sleep(13000);      
+				
 			} catch (Exception e) {
+				PrintFile.printReport(kc);
 				e.printStackTrace();
 			}
+			
 
 		}
 
