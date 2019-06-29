@@ -69,7 +69,12 @@ public class PrintFile {
 			index = 1;
 			for (Entry<String, List<ExecutionReport>> record : exerecords) {
 				fw3.append(index++ + ") order_id :" + record.getKey() + "\n");
-				fw3.append(record.getValue() + "\n");
+				List<ExecutionReport> a=record.getValue();
+				for(ExecutionReport b:a) {
+					fw3.append(b.toString());
+					fw3.append("\n");
+				}
+				//fw3.append(record.getValue() + "\n");
 				fw3.append("******************************************************************\n");
 				System.out.println("order_id :" + record.getKey());
 				System.out.println(record.getValue().toString());
@@ -78,6 +83,10 @@ public class PrintFile {
 			index = 1;
 			for (Entry<String, List<OrderTransaction>> record : OTrecords) {
 				fw4.append(index++ + ") order_id :" + record.getKey() + "\n");
+				List<OrderTransaction> a=record.getValue();
+				for(OrderTransaction b:a) {
+					fw4.append(b.toString()+"..\n");
+				}
 				fw4.append(record.getValue() + "\n");
 				fw4.append("******************************************************************\n");
 				System.out.println("order_id :" + record.getKey());
@@ -105,9 +114,12 @@ public class PrintFile {
 		int dom = currentDate.getDayOfMonth(); // 17
 		int doy = currentDate.getDayOfYear(); // 169
 		Month m = currentDate.getMonth(); // JUNE
-		boolean dir = new File(dom + m.toString()).mkdirs();
-		String filepath = "D:\\TestReports\\" + dom + m.toString() + "\\";
+		boolean dir = new File("D:\\TestReports\\"+m.toString()+dom).mkdirs();
+		//if(dir) {
+		String filepath = "D:\\TestReports\\"  + m.toString() + dom+"\\";
 		return filepath;
+		//}
+		//return "D:\\TestReports\\";
 	}
 
 	public static String getTime() {
@@ -128,7 +140,11 @@ public class PrintFile {
 		FileWriter fw5 = new FileWriter(fileComb, true);
 		for (Entry<String, List<ExecutionReport>> record : exerecords) {
 			fw5.append(index++ + ") order_id :" + record.getKey() + "\n");
-			fw5.append(record.getValue() + "\n");
+			List<ExecutionReport> a1=record.getValue();
+			for(ExecutionReport a2:a1) {
+				fw5.append(a2 + "\n");
+			}
+			
 			List<String>flowvalues=new ArrayList<>();
 			List<OrderTransaction>otvalues=new ArrayList<>();
 			
@@ -143,7 +159,8 @@ public class PrintFile {
 				.forEach(e->otvalues.addAll(e.getValue()));
 			
 				fw5.append("\nordertransaction values\n");
-				fw5.append(otvalues.toString());
+				for(OrderTransaction b:otvalues)
+				fw5.append(b+"\n");
             
 			
 			

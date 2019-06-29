@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -59,11 +60,18 @@ public class WebsocketApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
+		long a=System.currentTimeMillis();
 		// org.junit.runner.JUnitCore.main(t.runtcs("BTCUSDT","BUY","8600.00","0.601",1));
 		// t.runtcs(symbol, orderSide, limitPrice, orderqty, index);
 		tcases.test(kc); // uncomment this to run the test cases
 		// kct.setKafkaConsumer();
 		//PrintFile.printReport(kc);
+		long b=System.currentTimeMillis();
+		b=b-a;
+		long c=TimeUnit.MILLISECONDS.toSeconds(b);
+		long d=TimeUnit.MILLISECONDS.toMinutes(b);
+		System.out.println("total time taken in seconds "+c);
+		System.out.println("total time taken in Minutes "+d);
 
 	}
 }

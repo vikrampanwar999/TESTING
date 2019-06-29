@@ -55,6 +55,31 @@ public class KafkaConsumer {
 		}
 
 	}
+	private synchronized void ExeReportconsumer(ConsumerRecord<String, String> cr) {
+		System.out.println("here is message of consumer " + cr.value());
+		String er = cr.value();
+		ObjectMapper mapper = new ObjectMapper();
+		System.out.println("record return from venus " + er);
+
+		try {
+			ExecutionReport report = mapper.readValue(er, ExecutionReport.class);
+			setEr(report);
+			if (!ExecutionReportmap.containsKey(report.getOrderId()))
+				ExecutionReportmap.put(report.getOrderId(), new ArrayList<ExecutionReport>());
+			// String s="DEV.E55PRIME.ORDERS.INTERNAL channel recieved order with status
+			// "+report.getOrderStatus();
+			ExecutionReportmap.get(report.getOrderId()).add(report);
+			if (!flowReport.containsKey(report.getOrderId()))
+				flowReport.put(report.getOrderId(), new ArrayList<String>());
+			String s = "DEV.E55PRIME.EXECUTIONREPORTS channel recieved order with status " + report.getOrderStatus();
+			flowReport.get(report.getOrderId()).add(s);
+			//System.out.println("here is the order status from execution report" + report.getOrderStatus());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
 
 	private synchronized void transactionconsumer(ConsumerRecord<String, String> cr) {
 		System.out.println(
@@ -180,9 +205,9 @@ public class KafkaConsumer {
 			} else if (record.topic().equals(kafkaConfig.getOrInternal())) {
 				// need to invoke diffrent methods based on this
 				this.OrderInternalconsumer(record);
-			} else if (record.topic().equals(kafkaConfig.getProducerTopicPrefix())) {
+			} else if (record.topic().equals(kafkaConfig.getConsumerTopicPrefix())) {
 				// need to invoke diffrent methods based on this
-				this.Orderconsumer(record);
+				this.ExeReportconsumer(record);
 			} else if (record.topic().startsWith(kafkaConfig.getProducerTopicPrefix())
 					&& endsWithAnyOFString(record.topic(), kafkaConfig.getorderTopicSuffix().split(","))) {
 				System.out.println("inside the venu");
