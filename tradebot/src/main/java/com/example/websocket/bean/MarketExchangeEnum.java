@@ -7,5 +7,7 @@ public enum MarketExchangeEnum {
 	BITREX,
 	E55,
 	LUNO,
-	GEMINI
+	GEMINI,
+	SOR,
+	BITTREX
 }

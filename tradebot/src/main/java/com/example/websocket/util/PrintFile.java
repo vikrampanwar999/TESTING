@@ -18,20 +18,36 @@ import java.util.stream.Collectors;
 import java.util.Map.Entry;
 
 import com.example.test.TestCase1;
-import com.example.websocket.bean.ExecutionReport;
+import com.example.websocket.bean.OrderExecutionReport;
 import com.example.websocket.bean.OrderTransaction;
 import com.example.websocket.conf.KafkaConfig;
 import com.example.websocket.service.impl.KafkaConsumer;
 
 public class PrintFile {
-	public static void printReport(KafkaConfig kc) {
-
+	public static final String path="D:\\TestReports2\\prod\\";
+	private static PrintFile pf=null;
+	private PrintFile() {
+		
+		
+	}
+	public static synchronized PrintFile getPrintFile() {
+		if(pf==null) {
+			pf=new PrintFile();
+		}
+		if(pf.path==null) {
+			//filepath();
+		}
+		return pf;
+	}
+	public synchronized void printReport(KafkaConfig kc) {
+			//path=filepath();
 		try {
 
-			String filename = filepath() + getTime() + "err.txt";
-			String fileflow = filepath() + getTime() + "flow.txt";
-			String fileExe = filepath() + getTime() + "exe.txt";
-			String fileOT = filepath() + getTime() + "OT.txt";
+			String filename = path + "err.txt";
+			String fileflow = path  + "flow.txt";
+			String fileExe = path  + "exe.txt";
+			String fileOT = path + "OT.txt";
+			System.out.println("file path:"+filename);
 			FileWriter fw = new FileWriter(filename, true);
 			FileWriter fw2 = new FileWriter(fileflow, true);
 			FileWriter fw3 = new FileWriter(fileExe, true);
@@ -43,7 +59,7 @@ public class PrintFile {
 			KafkaConsumer kconsumer = new KafkaConsumer(kc);
 			Set<Entry<String, List<String>>> flowrecords = kconsumer.flowReport.entrySet();
 			Set<Entry<String, List<String>>> records = TestCase1.faultyorders.entrySet();
-			Set<Entry<String, List<ExecutionReport>>> exerecords = kconsumer.ExecutionReportmap.entrySet();
+			Set<Entry<String, List<OrderExecutionReport>>> exerecords = kconsumer.ExecutionReportmap.entrySet();
 			Set<Entry<String, List<OrderTransaction>>> OTrecords = kconsumer.transactionmap.entrySet();
 
 			System.out.println("########################################### Total executed test cases " + records.size()
@@ -67,10 +83,10 @@ public class PrintFile {
 
 			}
 			index = 1;
-			for (Entry<String, List<ExecutionReport>> record : exerecords) {
+			for (Entry<String, List<OrderExecutionReport>> record : exerecords) {
 				fw3.append(index++ + ") order_id :" + record.getKey() + "\n");
-				List<ExecutionReport> a=record.getValue();
-				for(ExecutionReport b:a) {
+				List<OrderExecutionReport> a=record.getValue();
+				for(OrderExecutionReport b:a) {
 					fw3.append(b.toString());
 					fw3.append("\n");
 				}
@@ -94,6 +110,8 @@ public class PrintFile {
 
 			}
 			combinedRecord(flowrecords, records, exerecords, OTrecords);
+			combinedFilledRecord("FILLED",flowrecords, records, exerecords, OTrecords);
+			combinedFilledRecord("NOTFILLED",flowrecords, records, exerecords, OTrecords);
 			fw.close();
 			fw2.close();
 			fw3.close();
@@ -108,18 +126,19 @@ public class PrintFile {
 		}
 	}
 
-	public static String filepath() {
+	public static synchronized String filepath() {
 		LocalDate currentDate = LocalDate.now(); // 2016-06-17
 		DayOfWeek dow = currentDate.getDayOfWeek(); // FRIDAY
 		int dom = currentDate.getDayOfMonth(); // 17
 		int doy = currentDate.getDayOfYear(); // 169
 		Month m = currentDate.getMonth(); // JUNE
-		boolean dir = new File("D:\\TestReports\\"+m.toString()+dom).mkdirs();
+		String path="D:\\TestReports2\\"+dom+m.toString();
+		boolean dir = new File(path).mkdirs();
 		//if(dir) {
-		String filepath = "D:\\TestReports\\"  + m.toString() + dom+"\\";
-		return filepath;
+		//String filepath = "D:\\TestReports\\"  + dom+m.toString()+getTime()+"\\";
+		//return path+"\\";
 		//}
-		//return "D:\\TestReports\\";
+		return "D:\\TestReports2\\july\\";
 	}
 
 	public static String getTime() {
@@ -132,16 +151,17 @@ public class PrintFile {
 
 	}
 
-	public static void combinedRecord(Set<Entry<String, List<String>>> flowrecords,
-			Set<Entry<String, List<String>>> records, Set<Entry<String, List<ExecutionReport>>> exerecords,
+	public static synchronized void combinedRecord(Set<Entry<String, List<String>>> flowrecords,
+			Set<Entry<String, List<String>>> records, Set<Entry<String, List<OrderExecutionReport>>> exerecords,
 			Set<Entry<String, List<OrderTransaction>>> OTrecords) throws IOException {
 		int index=1;
-		String fileComb = filepath() + getTime() + "combined.txt";
+		String fileComb = path  + "combined.txt";
+		System.out.println("file path:"+fileComb);
 		FileWriter fw5 = new FileWriter(fileComb, true);
-		for (Entry<String, List<ExecutionReport>> record : exerecords) {
+		for (Entry<String, List<OrderExecutionReport>> record : exerecords) {
 			fw5.append(index++ + ") order_id :" + record.getKey() + "\n");
-			List<ExecutionReport> a1=record.getValue();
-			for(ExecutionReport a2:a1) {
+			List<OrderExecutionReport> a1=record.getValue();
+			for(OrderExecutionReport a2:a1) {
 				fw5.append(a2 + "\n");
 			}
 			
@@ -151,6 +171,55 @@ public class PrintFile {
 				flowrecords.stream()
 				.filter(a->a.getKey().equals(record.getKey()))
 				.forEach(e->flowvalues.addAll(e.getValue()));
+				fw5.append("\nflow values\n");
+				fw5.append(flowvalues.toString());
+       
+				OTrecords.stream()
+				.filter(a->a.getKey().equals(record.getKey()))
+				.forEach(e->otvalues.addAll(e.getValue()));
+			
+				fw5.append("\nordertransaction values\n");
+				for(OrderTransaction b:otvalues)
+				fw5.append(b+"\n");
+            
+			
+			
+			fw5.append("\n******************************************************************\n");
+		}
+			fw5.close();
+		}
+	
+	public static synchronized void combinedFilledRecord(String status,Set<Entry<String, List<String>>> flowrecords,
+			Set<Entry<String, List<String>>> records, Set<Entry<String, List<OrderExecutionReport>>> exerecords,
+			Set<Entry<String, List<OrderTransaction>>> OTrecords) throws IOException {
+		int index=1;
+		String fileComb = path +getTime()+ status +".txt";
+		FileWriter fw5 = new FileWriter(fileComb, true);
+		for (Entry<String, List<OrderExecutionReport>> record : exerecords) {
+			List<String>flowvalues=new ArrayList<>();
+			List<OrderTransaction>otvalues=new ArrayList<>();
+			flowrecords.stream()
+			.filter(a->a.getKey().equals(record.getKey()))
+			.forEach(e->flowvalues.addAll(e.getValue()));
+			long filledcount=flowvalues.stream().filter(e->e.contains("FILLED")).count();
+			
+			
+			if(status.equals("NOTFILLED")) {
+				//System.out.println("nonfilled count:"+nonfilledcount);
+				if(filledcount>0) {continue;}
+			}
+			else {
+			if(filledcount<=0) {continue;}}
+			/*String fill="DEV.E55PRIME.EXECUTIONREPORTS channel recieved order with status FILLED";
+			if(!flowvalues.contains(fill)) {continue;}*/
+			fw5.append(index++ + ") order_id :" + record.getKey() + "\n");
+			List<OrderExecutionReport> a1=record.getValue();
+			for(OrderExecutionReport a2:a1) {
+				fw5.append(a2 + "\n");
+			}
+			
+		
+			
 				fw5.append("\nflow values\n");
 				fw5.append(flowvalues.toString());
        

@@ -3,6 +3,7 @@ package com.example.websocket.service.impl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,22 +12,21 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.MessageListener;
-
-import com.example.websocket.bean.ExecutionReport;
 import com.example.websocket.bean.Order;
+import com.example.websocket.bean.OrderExecutionReport;
 import com.example.websocket.bean.OrderTransaction;
 import com.example.websocket.bean.OrderTransactionWrapper;
 import com.example.websocket.conf.KafkaConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class KafkaConsumer {
-	private ExecutionReport er;
+	private OrderExecutionReport er;
 	private Order order;
 	private OrderTransaction ot;
-	public static HashMap<String, List<Order>> ordermap = new HashMap<>();
-	public static HashMap<String, List<OrderTransaction>> transactionmap = new HashMap<>();
-	public static HashMap<String, List<ExecutionReport>> ExecutionReportmap = new HashMap<>();
-	public static HashMap<String, List<String>> flowReport = new HashMap<>();
+	public static HashMap<String, List<Order>> ordermap = new LinkedHashMap<>();
+	public static HashMap<String, List<OrderTransaction>> transactionmap = new LinkedHashMap<>();
+	public static HashMap<String, List<OrderExecutionReport>> ExecutionReportmap = new LinkedHashMap<>();
+	public static HashMap<String, List<String>> flowReport = new LinkedHashMap<>();
 	// private KafkaTemplate<String, String> kt;
 	// private ObjectMapper om=new ObjectMapper();
 
@@ -37,10 +37,10 @@ public class KafkaConsumer {
 		System.out.println("record return from venus " + er);
 
 		try {
-			ExecutionReport report = mapper.readValue(er, ExecutionReport.class);
+			OrderExecutionReport report = mapper.readValue(er, OrderExecutionReport.class);
 			setEr(report);
 			if (!ExecutionReportmap.containsKey(report.getOrderId()))
-				ExecutionReportmap.put(report.getOrderId(), new ArrayList<ExecutionReport>());
+				ExecutionReportmap.put(report.getOrderId(), new ArrayList<OrderExecutionReport>());
 			// String s="DEV.E55PRIME.ORDERS.INTERNAL channel recieved order with status
 			// "+report.getOrderStatus();
 			ExecutionReportmap.get(report.getOrderId()).add(report);
@@ -62,10 +62,10 @@ public class KafkaConsumer {
 		System.out.println("record return from venus " + er);
 
 		try {
-			ExecutionReport report = mapper.readValue(er, ExecutionReport.class);
+			OrderExecutionReport report = mapper.readValue(er, OrderExecutionReport.class);
 			setEr(report);
 			if (!ExecutionReportmap.containsKey(report.getOrderId()))
-				ExecutionReportmap.put(report.getOrderId(), new ArrayList<ExecutionReport>());
+				ExecutionReportmap.put(report.getOrderId(), new ArrayList<OrderExecutionReport>());
 			// String s="DEV.E55PRIME.ORDERS.INTERNAL channel recieved order with status
 			// "+report.getOrderStatus();
 			ExecutionReportmap.get(report.getOrderId()).add(report);
@@ -164,7 +164,7 @@ public class KafkaConsumer {
 		if (er != null) {
 			ObjectMapper mapper = new ObjectMapper();
 			try {
-				ExecutionReport report = mapper.readValue(er, ExecutionReport.class);
+				OrderExecutionReport report = mapper.readValue(er, OrderExecutionReport.class);
 				if (!flowReport.containsKey(report.getOrderId()))
 					flowReport.put(report.getOrderId(), new ArrayList<String>());
 				if (report.getOrderStatus() != null) {
@@ -247,11 +247,11 @@ public class KafkaConsumer {
 		container.start();
 	}
 
-	public ExecutionReport getEr() {
+	public OrderExecutionReport getEr() {
 		return er;
 	}
 
-	public void setEr(ExecutionReport er) {
+	public void setEr(OrderExecutionReport er) {
 
 		this.er = er;
 	}

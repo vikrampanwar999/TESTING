@@ -1,24 +1,18 @@
 package com.example.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ErrorCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.example.websocket.bean.ExecutionReport;
 import com.example.websocket.bean.Order;
 import com.example.websocket.bean.OrderTransaction;
 import com.example.websocket.bean.Result;
@@ -50,6 +44,8 @@ public class TestCase1 {
 		LOGGER.debug("Starting running the test case No " + index);
 		TestUtil tu = new TestUtil();
 		Result result = tu.PostReq(symbol, orderSide, limitPrice, orderqty);
+		//tu.PostReqWithCancel(symbol, orderSide, limitPrice, orderqty);
+		
 		if("REJECTED".equals(result.getOrderStatus())) {
 			return;
 		}
@@ -74,6 +70,20 @@ public class TestCase1 {
 		//Thread.sleep(30000); for regression testing
 		System.out.println("here is the execution flow report " + KafkaConsumer.flowReport.get(result.getOrderId()));
 	}
+	
+	public void test3(String symbol, String orderSide, String limitPrice, String orderqty, String index)
+			throws IOException, InterruptedException {
+		System.out.println("this is test case " + index
+				+ "_______________________________________________________________________________________________");
+
+		LOGGER.debug("Starting running the test case No " + index);
+		TestUtil tu = new TestUtil();
+		//Result result = tu.PostReq(symbol, orderSide, limitPrice, orderqty);
+		tu.PostReqWithCancel(symbol, orderSide, limitPrice, orderqty);
+		
+		
+	}
+
 
 	public void checkTransactionMap() {
 		List<String> lsj = new ArrayList<>();

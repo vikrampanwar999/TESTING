@@ -25,10 +25,10 @@ public class TestCases {
 		tc1.setKafkaConsumer();
 		Thread.sleep(5000);
 		Thread.sleep(13000);
-
-		ExecutorService executor = Executors.newFixedThreadPool(100);
+		PrintFile pf=PrintFile.getPrintFile();
+		ExecutorService executor = Executors.newFixedThreadPool(1);
 		List<Future<?>> lf=new ArrayList<Future<?>>();
-		for (int i = 0; i<150; i++) {
+		for (int i = 0; i<1; i++) {
 			Future<?> p=executor.submit(new testcaseRunner());
 			lf.add(p);
 		}
@@ -48,7 +48,9 @@ public class TestCases {
 			e.printStackTrace();
 		}
 		finally {
-			PrintFile.printReport(kc);
+			PrintFile pf1=PrintFile.getPrintFile();
+			pf1.printReport(kc);
+			System.exit(0);
 		}
 		//executor.awaitTermination(45,TimeUnit.MINUTES);
 	}
@@ -96,7 +98,7 @@ public class TestCases {
 				Thread.sleep(13000);
 				tc1.test2("BTCUSDT", "SELL", "11500.00", "0.259","18 EXTREME HIGH QTY SELL");//cancelled 
 				Thread.sleep(13000);*/
-			/*	
+				/*
 				tc1.test2("BTCUSDT", "BUY", "14000.00", "0.0007801", " 1 ");
 				Thread.sleep(13000);                                                           
 				tc1.test2("BTCUSDT", "BUY", "15000.00", "0.000087651", " 2");
@@ -134,31 +136,31 @@ public class TestCases {
 				Thread.sleep(13000);                222combined txt
 				*/
 				
-				tc1.test2("BTCUSDT", "BUY", "14000.00", "0.0012", " 1 ");
+				tc1.test2("BTCUSDT", "SELL", "9000.00", "0.0012", " 1 ");
 				//Thread.sleep(13000);                                                           
-				tc1.test2("BTCUSDT", "BUY", "15000.00", "0.012", " 2");
+				tc1.test2("BTCUSDT", "BUY", "15000.00", "0.0012", " 2");
 				//Thread.sleep(13000);                                                           
-				tc1.test2("BTCUSDT", "SELL", "9500.00", "0.014", " 3");
+				tc1.test2("BTCUSDT", "SELL", "9500.00", "0.0014", " 3");
 				//Thread.sleep(13000);                                                           
 				tc1.test2("BTCUSD", "SELL", "14500.00", "0.0019", " 4 ");
 				//Thread.sleep(13000);                                                           
-				tc1.test2("BTCUSD", "SELL", "14500.00", "0.0031", "5 ");//  
+				tc1.test2("BTCUSD", "SELL", "14500.00", "0.0011", "5 ");//  
 				//Thread.sleep(13000);                                                           
-				tc1.test2("BTCUSD", "BUY", "14400.00", "0.0045", "6 ");//  
+				tc1.test2("BTCUSD", "BUY", "14400.00", "0.0015", "6 ");//  
 				//Thread.sleep(13000);                                                           
 				                                                                               
-				tc1.test2("BTCUSD", "BUY", "14003.00", "0.0345", "7 ");//p
+				tc1.test2("BTCUSD", "BUY", "14003.00", "0.00145", "7 ");//p
 				//Thread.sleep(13000);                                                           
-				tc1.test2("BTCUSD", "BUY", "14000.00", "0.0020", "8");//
+				tc1.test2("BTCUSD", "BUY", "14000.00", "0.0010", "8");//
 				//Thread.sleep(13000);                                                           
 				                                                                               
 				tc1.test2("BTCUSD", "SELL", "9070.00", "0.0010", " 9");//failed in
 				//Thread.sleep(13000);                                                           
 				tc1.test2("BTCUSDT", "BUY", "14800.00", "0.0041", " 10 ");//failed in
 				//Thread.sleep(13000);                                                           
-				tc1.test2("BTCUSDT", "BUY", "14300.00", "0.004010", " 11");//fai
+				tc1.test2("BTCUSDT", "BUY", "14300.00", "0.001010", " 11");//fai
 				//Thread.sleep(13000);                                                           
-				tc1.test2("BTCUSDT", "BUY", "14200.00", "0.00810", " 12 ");//fai
+				tc1.test2("BTCUSDT", "BUY", "14200.00", "0.00110", " 12 ");//fai
 				//Thread.sleep(13000);                                                           
 				tc1.test2("BTCUSDT", "BUY", "14000.00", "0.001", "13 low qty");//pass canc
 				//Thread.sleep(13000);                                                           
@@ -167,11 +169,52 @@ public class TestCases {
 				tc1.test2("BTCUSDT", "SELL", "11000.00", "0.0014", "15 low qty sell");//pas
 				//Thread.sleep(13000);                                                          
 				
-				tc1.test2("BTCUSDT", "BUY", "15000.00", "0.0024", "16 medium qty sell");//
-				//Thread.sleep(13000);      
+				tc1.test2("BTCUSDT", "BUY", "14250.00", "0.0014", "16 medium qty buy");//
+				//Thread.sleep(3000);
+				//tc1.test2("BTCUSDT", "SELL", "11300.00", "0.0024", "16 medium qty sell");//
+				//Thread.sleep(3000);
 				
+				tc1.test3("BTCUSDT", "SELL", "9000.00", "0.0012", " 1cancel ");
+				//Thread.sleep(13000);                                                           
+				tc1.test3("BTCUSDT", "BUY", "15000.00", "0.0012", " 2cancel");
+				//Thread.sleep(13000);                                                           
+				tc1.test3("BTCUSDT", "SELL", "9500.00", "0.0014", " 3cancel");
+				//Thread.sleep(13000);                                                           
+				tc1.test3("BTCUSD", "SELL", "14500.00", "0.0019", " 4cancel");
+				//Thread.sleep(13000);                                                           
+				tc1.test3("BTCUSD", "SELL", "14500.00", "0.0011", "5 cancel");//  
+				//Thread.sleep(13000);                                                           
+				tc1.test3("BTCUSD", "BUY", "14400.00", "0.0015", "6 cancel");//  
+				//Thread.sleep(13000);                                                           
+				                                                                               
+				tc1.test3("BTCUSD", "BUY", "14003.00", "0.00145", "7cancel ");//p
+				//Thread.sleep(13000);                                                           
+				tc1.test3("BTCUSD", "BUY", "14000.00", "0.0010", "8cancel");//
+				//Thread.sleep(13000);                                                           
+				                                                                               
+				tc1.test3("BTCUSD", "SELL", "9070.00", "0.0010", " 9cancel");//failed in
+				//Thread.sleep(13000);                                                           
+				tc1.test3("BTCUSDT", "BUY", "14800.00", "0.0041", " 10cancel ");//failed in
+				//Thread.sleep(13000);                                                           
+				tc1.test3("BTCUSDT", "BUY", "14300.00", "0.004010", " 11cancel");//fai
+				//Thread.sleep(13000);                                                           
+				tc1.test3("BTCUSDT", "BUY", "14200.00", "0.00810", " 12 cancel");//fai
+				//Thread.sleep(13000);                                                           
+				tc1.test3("BTCUSDT", "BUY", "14000.00", "0.001", "13 cancel");//pass canc
+				//Thread.sleep(13000);                                                           
+				tc1.test3("LTCBTC", "SELL", "10070.00", "0.0003", "14cancel ");
+				//Thread.sleep(13000);                                                           
+				tc1.test3("BTCUSDT", "SELL", "11000.00", "0.0014", "15 cancel");//pas
+				//Thread.sleep(13000);                                                          
+				
+				tc1.test3("BTCUSDT", "BUY", "14250.00", "0.0024", "16 cancel");//
+				//Thread.sleep(3000);
+		tc1.test3("BTCUSDT", "BUY", "1300.00", "0.0024", "17 cancel");//
+				//Thread.sleep(3000);
+			
 			} catch (Exception e) {
-				PrintFile.printReport(kc);
+				
+				//PrintFile.printReport(kc);
 				e.printStackTrace();
 			}
 			
